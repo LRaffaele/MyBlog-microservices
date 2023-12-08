@@ -1,0 +1,73 @@
+server:
+  port: 0
+  servlet:
+    context-path: /ms-category
+    #http://{nome_host}:{porta}/auth/restoDellUrl
+
+spring:
+  application:
+    name: ms-category
+
+  datasource:
+    url: jdbc:mariadb://localhost:3306/ms_category?createDatabaseIfNotExist=true&autoReconnect=true&useSLL=false
+    username: root
+    password:
+
+  #Configurazione JPA
+  jpa:
+    hibernate:
+      # all'avvio dell'app viene generato il db e le tabelle partendo dalle classi
+      # Values:
+      # none: non fa nulla, non crea tabelle dalle classi. si usa in produzione!!
+      # create-drop: crea le tabelle all'avvio dell'applicazione e fa un drop del db alla chiusura.
+      #              Delle volte crea le tabelle figlio prima delle tabelle padre, segue un ordine tutto suo. si usa in fase dev.
+      # update: creo sul db le tabelle se non esistono ( o aggiungo campi alle tabelle esistenti ).
+      #         In pratica riporta solo ciò che è nuovo e non modifica i dati esistenti.
+      #         NB: se modifico una classe e cambio nome/tipo mi ritrovo sul DB DUE CLASSI PER LO STESSO VALORE.
+      #         Questa modalita CREA LE TABELLE NEL GIUSTO ORDINE - PADRE -> FIGLIO
+      ddl-auto: update
+
+    properties:
+      # Serve a far capire ad HIBERNATE come ottimizzare le query per il DB scelto.
+      # Ci permette di leggere in console le query inviate
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+    show-sql: true
+    open-in-view: false
+
+    #possiamo specificare diversi livelli di log in base a quello che ci serve
+
+    # ogni volta che uso un qualcosa che utilizzi questo framework utilizza il log level INFO
+    # Values:
+    # info:
+    # debug:
+
+logging:
+  level:
+    it.cgmconsulting.ms-category: info
+    org.hibernate.orm.jdbc.bind: trace
+    org.springframework: info # mostro i parametri nella query al posto di ?
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
+eureka:
+  client:
+    service-url:
+      default-zone: localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health
+  info:
+    java.enabled: true
+    os.enabled: true
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
